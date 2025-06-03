@@ -29,9 +29,5 @@ public class OrderRequest {
     @NotBlank(message = "Phường/Xã là bắt buộc")
     private String shippingWard;
 
-    @NotBlank(message = "Phương thức thanh toán là bắt buộc")
-    private String paymentMethod;
-
-    @NotBlank(message = "Phương thức vận chuyển là bắt buộc")
-    private String deliveryMethod;
-} 
+    private String note;
+}

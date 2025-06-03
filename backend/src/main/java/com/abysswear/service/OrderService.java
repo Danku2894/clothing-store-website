@@ -39,6 +39,7 @@ public class OrderService {
         }
 
         Order order = Order.builder()
+                .orderNumber(generateOrderNumber())
                 .user(user)
                 .status(OrderStatus.PENDING)
                 .recipientName(request.getRecipientName())
@@ -47,8 +48,7 @@ public class OrderService {
                 .shippingCity(request.getShippingCity())
                 .shippingDistrict(request.getShippingDistrict())
                 .shippingWard(request.getShippingWard())
-                .paymentMethod(request.getPaymentMethod())
-                .deliveryMethod(request.getDeliveryMethod())
+                .note(request.getNote())
                 .shippingFee(BigDecimal.valueOf(30000)) // Fixed shipping fee
                 .build();
 
@@ -93,7 +93,7 @@ public class OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
-        if (!order.getUser().getId().equals(user.getId()) && user.getRole() != Role.ADMIN) {
+        if (!order.getUser().getId().equals(user.getId()) && user.getRole() != UserRole.ADMIN) {
             throw new AccessDeniedException("Access denied");
         }
 
@@ -122,7 +122,7 @@ public class OrderService {
 
         return OrderResponse.builder()
                 .id(order.getId())
-                .orderNumber(String.format("ORD%06d", order.getId()))
+                .orderNumber(order.getOrderNumber())
                 .status(order.getStatus())
                 .items(items)
                 .subtotal(order.getSubtotal())
@@ -134,8 +134,7 @@ public class OrderService {
                 .shippingCity(order.getShippingCity())
                 .shippingDistrict(order.getShippingDistrict())
                 .shippingWard(order.getShippingWard())
-                .paymentMethod(order.getPaymentMethod())
-                .deliveryMethod(order.getDeliveryMethod())
+                .note(order.getNote())
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .build();
@@ -151,7 +150,11 @@ public class OrderService {
                 .quantity(item.getQuantity())
                 .size(item.getSize())
                 .color(item.getColor())
-                .subtotal(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
                 .build();
     }
-} 
+
+    private String generateOrderNumber() {
+        // Generate a random order number with format ORDyyyyMMddHHmmss
+        return "ORD" + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+    }
+}

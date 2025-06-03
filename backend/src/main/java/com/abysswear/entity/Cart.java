@@ -5,7 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,24 +28,16 @@ public class Cart {
     private User user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<CartItem> items = new ArrayList<>();
 
-    @Column(name = "created_at")
-    private java.time.LocalDateTime createdAt;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private java.time.LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = java.time.LocalDateTime.now();
-        updatedAt = createdAt;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = java.time.LocalDateTime.now();
-    }
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     public void addItem(CartItem item) {
         items.add(item);
@@ -57,4 +52,4 @@ public class Cart {
     public void clear() {
         items.clear();
     }
-} 
+}

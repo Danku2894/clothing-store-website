@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import useAuthStore from '../store/authStore'
-import { auth } from '../utils/api'
+import authService from '../services/authService'
 import AuthLayout from '../components/auth/AuthLayout'
 
 interface LoginFormData {
@@ -71,12 +71,13 @@ export default function Login() {
 
     setIsLoading(true)
     try {
-      const data = await auth.login(formData.email, formData.password)
-      login(data.token, data.user)
+      const response = await authService.login(formData.email, formData.password)
+      login(response.accessToken, response.user)
       toast.success('Đăng nhập thành công')
       navigate(from, { replace: true })
-    } catch (error) {
-      toast.error('Email hoặc mật khẩu không chính xác')
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Email hoặc mật khẩu không chính xác'
+      toast.error(errorMessage)
       console.error('Login error:', error)
     } finally {
       setIsLoading(false)

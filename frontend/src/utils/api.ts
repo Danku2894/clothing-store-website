@@ -1,6 +1,6 @@
 import useAuthStore from '../store/authStore'
 
-const API_BASE_URL = '/api'
+const API_BASE_URL = 'http://localhost:8080/api'
 
 interface ApiError extends Error {
   status?: number
@@ -82,11 +82,12 @@ export const auth = {
   
   logout: () => api.post('/auth/logout', {}),
   
-  getProfile: () => api.get('/auth/profile'),
+  getCurrentUser: () => api.get('/auth/me'),
   
   updateProfile: (data: {
     firstName: string
     lastName: string
+    email: string
     phone?: string
     address?: string
     city?: string
@@ -136,4 +137,4 @@ export const orders = {
   getById: (id: string) => api.get(`/orders/${id}`),
   
   cancel: (id: string) => api.post(`/orders/${id}/cancel`, {}),
-} 
+}

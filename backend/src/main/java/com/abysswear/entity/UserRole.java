@@ -1,6 +1,7 @@
 package com.abysswear.entity;
 
-public enum Role {
+public enum UserRole {
     USER,
+    STAFF,
     ADMIN
-} 
+}

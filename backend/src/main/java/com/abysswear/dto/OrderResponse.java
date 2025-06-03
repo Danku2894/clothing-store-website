@@ -28,8 +28,7 @@ public class OrderResponse {
     private String shippingCity;
     private String shippingDistrict;
     private String shippingWard;
-    private String paymentMethod;
-    private String deliveryMethod;
+    private String note;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -46,6 +45,5 @@ public class OrderResponse {
         private Integer quantity;
         private String size;
         private String color;
-        private BigDecimal subtotal;
     }
-} 
+}

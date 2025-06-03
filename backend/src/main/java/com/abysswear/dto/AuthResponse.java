@@ -1,6 +1,6 @@
 package com.abysswear.dto;
 
-import com.abysswear.entity.Role;
+import com.abysswear.entity.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,6 +29,7 @@ public class AuthResponse {
         private String city;
         private String district;
         private String ward;
-        private Role role;
+        private UserRole role;
+        private boolean active;
     }
-} 
+}

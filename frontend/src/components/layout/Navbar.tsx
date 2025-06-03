@@ -1,13 +1,20 @@
 import { Fragment, useState } from 'react'
 import { Dialog, Disclosure, Popover, Transition } from '@headlessui/react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 import {
   Bars3Icon,
   XMarkIcon,
   ShoppingBagIcon,
   UserIcon,
+  UserCircleIcon,
+  Cog6ToothIcon,
+  ArrowRightOnRectangleIcon,
+  ShoppingCartIcon,
 } from '@heroicons/react/24/outline'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
+import useAuthStore from '../../store/authStore'
+import useCartStore from '../../store/cartStore'
 
 const collections = [
   { name: 'NON STANDARD', href: '/collections/non-standard' },
@@ -39,6 +46,17 @@ function classNames(...classes: string[]) {
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user, isAuthenticated, logout } = useAuthStore()
+  const { items } = useCartStore()
+  const navigate = useNavigate()
+
+  const cartItemsCount = items.reduce((total, item) => total + item.quantity, 0)
+
+  const handleLogout = () => {
+    logout()
+    toast.success('Đã đăng xuất thành công')
+    navigate('/login')
+  }
 
   return (
     <header className="fixed w-full bg-black text-white z-50">
@@ -158,18 +176,80 @@ export default function Navbar() {
         </Popover.Group>
 
         <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-6">
-          <Link 
-            to="/cart" 
-            className="group -m-2.5 p-2.5 text-white hover:text-gray-300 transition-colors"
-          >
-            <ShoppingBagIcon className="h-6 w-6" aria-hidden="true" />
-          </Link>
-          <Link 
-            to="/login" 
-            className="group -m-2.5 p-2.5 text-white hover:text-gray-300 transition-colors"
-          >
-            <UserIcon className="h-6 w-6" aria-hidden="true" />
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                to="/cart"
+                className="group flex items-center gap-x-1 text-sm font-semibold leading-6 hover:text-gray-300 transition-colors relative"
+              >
+                <ShoppingBagIcon className="h-6 w-6" aria-hidden="true" />
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
+                    {cartItemsCount}
+                  </span>
+                )}
+              </Link>
+              
+              <Popover className="relative">
+                <Popover.Button className="flex items-center gap-x-1 text-sm font-semibold leading-6 hover:text-gray-300 transition-colors">
+                  <UserCircleIcon className="h-6 w-6" aria-hidden="true" />
+                </Popover.Button>
+
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-200"
+                  enterFrom="opacity-0 translate-y-1"
+                  enterTo="opacity-100 translate-y-0"
+                  leave="transition ease-in duration-150"
+                  leaveFrom="opacity-100 translate-y-0"
+                  leaveTo="opacity-0 translate-y-1"
+                >
+                  <Popover.Panel className="absolute right-0 top-full z-10 mt-3 w-48 rounded-xl bg-black p-2 shadow-lg ring-1 ring-gray-900/5">
+                    <div className="px-3 py-2 text-sm font-semibold text-white">
+                      {user?.firstName} {user?.lastName}
+                    </div>
+                    <div className="border-t border-gray-800 my-1"></div>
+                    <Link
+                      to="/profile"
+                      className="flex items-center gap-x-2 rounded-lg px-3 py-2 text-sm font-semibold leading-6 hover:bg-gray-800 transition-colors"
+                    >
+                      <UserCircleIcon className="h-5 w-5" />
+                      Tài khoản
+                    </Link>
+                    <Link
+                      to="/orders"
+                      className="flex items-center gap-x-2 rounded-lg px-3 py-2 text-sm font-semibold leading-6 hover:bg-gray-800 transition-colors"
+                    >
+                      <ShoppingCartIcon className="h-5 w-5" />
+                      Đơn hàng
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-x-2 rounded-lg px-3 py-2 text-sm font-semibold leading-6 hover:bg-gray-800 transition-colors text-red-500"
+                    >
+                      <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                      Đăng xuất
+                    </button>
+                  </Popover.Panel>
+                </Transition>
+              </Popover>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="text-sm font-semibold leading-6 hover:text-gray-300 transition-colors"
+              >
+                Đăng nhập
+              </Link>
+              <Link
+                to="/register"
+                className="text-sm font-semibold leading-6 hover:text-gray-300 transition-colors"
+              >
+                Đăng ký
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -307,4 +387,4 @@ export default function Navbar() {
       </Dialog>
     </header>
   )
-} 
+}

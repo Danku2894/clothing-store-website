@@ -18,6 +18,7 @@ interface CartState {
   removeItem: (id: number) => void
   updateQuantity: (id: number, quantity: number) => void
   clearCart: () => void
+  getItemCount: () => number
   getSubtotal: () => number
   getTotal: () => number
   getShippingFee: () => number
@@ -34,16 +35,17 @@ const useCartStore = create<CartState>()(
           )
 
           if (existingItem) {
+            const newQuantity = Math.min(10, existingItem.quantity + newItem.quantity)
             return {
               items: state.items.map((item) =>
                 item.id === newItem.id && item.size === newItem.size && item.color === newItem.color
-                  ? { ...item, quantity: Math.min(10, item.quantity + newItem.quantity) }
+                  ? { ...item, quantity: newQuantity }
                   : item
               ),
             }
           }
 
-          return { items: [...state.items, newItem] }
+          return { items: [...state.items, { ...newItem, quantity: Math.min(10, newItem.quantity) }] }
         }),
       removeItem: (id) =>
         set((state) => ({
@@ -56,11 +58,20 @@ const useCartStore = create<CartState>()(
           ),
         })),
       clearCart: () => set({ items: [] }),
+      getItemCount: () => {
+        const state = get()
+        return state.items.reduce((total, item) => total + item.quantity, 0)
+      },
       getSubtotal: () => {
         const state = get()
-        return state.items.reduce((total, item) => total + item.price * item.quantity, 0)
+        return Math.round(state.items.reduce((total, item) => total + item.price * item.quantity, 0))
       },
-      getShippingFee: () => 30000, // Fixed shipping fee of 30,000₫
+      getShippingFee: () => {
+        const state = get()
+        // Miễn phí vận chuyển cho đơn hàng trên 1,000,000₫
+        const subtotal = state.getSubtotal()
+        return subtotal >= 1000000 ? 0 : 30000
+      },
       getTotal: () => {
         const state = get()
         return state.getSubtotal() + state.getShippingFee()
@@ -72,4 +83,4 @@ const useCartStore = create<CartState>()(
   )
 )
 
-export default useCartStore 
+export default useCartStore

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import useAuthStore from '../store/authStore'
-import { auth } from '../utils/api'
+import authService from '../services/authService'
 import AuthLayout from '../components/auth/AuthLayout'
 
 interface RegisterFormData {
@@ -98,12 +98,13 @@ export default function Register() {
 
     setIsLoading(true)
     try {
-      const data = await auth.register(formData)
-      login(data.token, data.user)
-      toast.success('Đăng ký thành công')
-      navigate('/')
-    } catch (error) {
-      toast.error('Đăng ký thất bại. Vui lòng thử lại')
+      const { firstName, lastName, email, password } = formData;
+      await authService.register({ firstName, lastName, email, password })
+      toast.success('Đăng ký thành công! Vui lòng đăng nhập.')
+      navigate('/login')
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại'
+      toast.error(errorMessage)
       console.error('Register error:', error)
     } finally {
       setIsLoading(false)

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { XMarkIcon, MinusIcon, PlusIcon } from '@heroicons/react/20/solid'
+import { toast } from 'react-hot-toast'
 import useCartStore from '../store/cartStore'
 
 export default function Cart() {
@@ -7,13 +8,32 @@ export default function Cart() {
 
   const handleQuantityChange = (id: number, delta: number) => {
     const item = items.find(item => item.id === id)
-    if (item) {
-      updateQuantity(id, item.quantity + delta)
+    if (!item) return
+
+    const newQuantity = item.quantity + delta
+    if (newQuantity < 1) {
+      toast.error('Số lượng không thể nhỏ hơn 1')
+      return
     }
+    if (newQuantity > 10) {
+      toast.error('Số lượng không thể lớn hơn 10')
+      return
+    }
+    updateQuantity(id, newQuantity)
+  }
+
+  const handleRemoveItem = (id: number) => {
+    removeItem(id)
+    toast.success('Đã xóa sản phẩm khỏi giỏ hàng')
   }
 
   const formatPrice = (price: number) => {
-    return price.toLocaleString('vi-VN') + '₫'
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price).replace('₫', '') + '₫'
   }
 
   return (
@@ -92,7 +112,7 @@ export default function Cart() {
                           <div className="absolute right-0 top-0">
                             <button
                               type="button"
-                              onClick={() => removeItem(item.id)}
+                              onClick={() => handleRemoveItem(item.id)}
                               className="-m-2 inline-flex p-2 text-gray-400 hover:text-gray-500"
                             >
                               <span className="sr-only">Xóa</span>
@@ -123,7 +143,10 @@ export default function Cart() {
                 <dd className="text-sm font-medium text-gray-900">{formatPrice(getSubtotal())}</dd>
               </div>
               <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                <dt className="text-sm text-gray-600">Phí vận chuyển</dt>
+                <dt className="flex items-center text-sm text-gray-600">
+                  <span>Phí vận chuyển</span>
+                  <span className="ml-2 text-xs text-gray-400">(Cố định)</span>
+                </dt>
                 <dd className="text-sm font-medium text-gray-900">{formatPrice(getShippingFee())}</dd>
               </div>
               <div className="flex items-center justify-between border-t border-gray-200 pt-4">
@@ -138,12 +161,13 @@ export default function Cart() {
                 className={`w-full rounded-md border border-transparent px-4 py-3 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-50 ${
                   items.length === 0
                     ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-primary-600 hover:bg-primary-700'
+                    : 'bg-black hover:bg-gray-800'
                 }`}
                 aria-disabled={items.length === 0}
                 onClick={(e) => {
                   if (items.length === 0) {
                     e.preventDefault()
+                    toast.error('Giỏ hàng của bạn đang trống')
                   }
                 }}
               >
@@ -155,4 +179,4 @@ export default function Cart() {
       </div>
     </div>
   )
-} 
+}

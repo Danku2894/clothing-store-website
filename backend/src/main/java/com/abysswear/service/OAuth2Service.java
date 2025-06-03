@@ -1,7 +1,7 @@
 package com.abysswear.service;
 
 import com.abysswear.dto.AuthResponse;
-import com.abysswear.entity.Role;
+import com.abysswear.entity.UserRole;
 import com.abysswear.entity.User;
 import com.abysswear.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +39,8 @@ public class OAuth2Service extends DefaultOAuth2UserService {
                             .email(email)
                             .firstName(firstName)
                             .lastName(lastName)
-                            .role(Role.USER)
+                            .role(UserRole.USER)
+                            .active(true)
                             .build();
                     return userRepository.save(newUser);
                 });
@@ -75,7 +76,8 @@ public class OAuth2Service extends DefaultOAuth2UserService {
                         .district(user.getDistrict())
                         .ward(user.getWard())
                         .role(user.getRole())
+                        .active(user.isActive())
                         .build())
                 .build();
     }
-} 
+}
